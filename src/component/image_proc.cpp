@@ -1,11 +1,14 @@
 #include "component/image_proc.h"
+
+#include "component/positioning.h"
+
 namespace ipo {
 int DynamicThreshold(const cv::Mat &src, cv::Mat &dst,
                      const int &blur_ksize, const int &offset,
                      const DynamicThresholdTypes &mode) {
   CV_Assert(!src.empty());
   if (dst.empty()) {
-    dst = cv::Mat::zeros(src.size(), src.type());
+    dst = cv::Mat::zeros(src.size(), CV_8UC1);
   }
 
   // convert to grayscale
@@ -14,27 +17,10 @@ int DynamicThreshold(const cv::Mat &src, cv::Mat &dst,
     std::cout << "\nERROR: int ipo::DynamicThreshold" << std::endl;
     return -1;
   }
-  // const int &&channel = src.channels();
-  // cv::Mat &&gray_src = cv::Mat::zeros(src.size(), CV_8UC1);
-  // switch (channel) {
-  //   case 1: {
-  //     gray_src = src.clone();
-  //     break;
-  //   }
-  //   case 3: {
-  //     cv::cvtColor(src, gray_src, cv::COLOR_BGR2GRAY, 1);
-  //     break;
-  //   }
-  //   default: {
-  //     std::cout << "\nERROR: ipo::DynamicThreshold (cv::Mat)src.channels != 1 || 3" << std::endl;
-  //     return -1;
-  //   }
-  // }
 
   // blur
-  cv::Mat &&gray_mean = cv::Mat::zeros(src.size(), CV_8UC1);
+  cv::Mat &&gray_mean = cv::Mat::zeros(gray_src.size(), CV_8UC1);
   cv::blur(gray_src, gray_mean, cv::Size(blur_ksize, blur_ksize));
-
   // for loop
   const int &w = src.rows;  // width
   const int &h = src.cols;  // height
@@ -99,7 +85,9 @@ int Stretching(const cv::Mat &src, cv::Mat &dst,
   switch (channel) {
     case 1: {
       // clone image
-      cv::Mat &&dst = cv::Mat::zeros(src.size(), CV_8UC1);
+      if (dst.empty()) {
+        dst = cv::Mat::zeros(src.size(), CV_8UC1);
+      }
       dst = src.clone();
 
       int n_rows = src.rows;  // y
@@ -142,7 +130,9 @@ int Stretching(const cv::Mat &src, cv::Mat &dst,
     }
     case 3: {
       // clone image
-      cv::Mat &&dst = cv::Mat::zeros(src.size(), CV_8UC3);
+      if (dst.empty()) {
+        dst = cv::Mat::zeros(src.size(), CV_8UC3);
+      }
       dst = src.clone();
 
       int n_rows = src.rows;  // y
@@ -198,7 +188,10 @@ int Variance(const cv::Mat &src, cv::Mat &dst, const int &kernel_size) {
   if (src.empty()) {
     std::cout << "\nERROR: int Variance --(cv::Mat)src.empty()" << std::endl;
     return -1;
+  } else if (dst.empty()) {
+    dst = cv::Mat::zeros(src.size(), CV_8UC1);
   }
+
   // convert to grayscale
   cv::Mat gray_src;
   if (ConvertMatToGrayscale(src, gray_src) != 0) {
@@ -242,6 +235,96 @@ int Variance(const cv::Mat &src, cv::Mat &dst, const int &kernel_size) {
   return 0;
 }
 
+int FindTheSpecifiedColorByRGB(const cv::Mat &src, cv::Mat &dst,
+                               const int &r, const int &g, const int &b, const double &tolerance) {
+  // check input
+  if (src.type() != CV_8UC3) {
+    std::cout << "\nERROR: int FindTheSpecifiedColorByRGB --(cv::Mat)src.type() != CV_8UC3" << std::endl;
+    return -1;
+  }
+  std::cout << "---FindTheSpecifiedColorByRGB UserSet---" << std::endl;
+  std::cout << "r : " << r << std::endl;
+  std::cout << "g : " << g << std::endl;
+  std::cout << "b : " << b << std::endl;
+  std::cout << "tolerance : " << tolerance << std::endl;
+  std::cout << "----------------------------------------" << std::endl;
+  int s_thres[2] = {100, 255};
+  int v_thres[2] = {0, 255};
+
+  // convert src to dst
+  cv::Mat &&hsv_s = cv::Mat::zeros(src.size(), CV_8UC3);  // channel = 3
+  cv::cvtColor(src, hsv_s, CV_BGR2HSV);
+  cv::Mat &&selected_color = cv::Mat::zeros(src.size(), CV_8UC1);  // channel = 1
+  // cv::Mat &&bitwise_and = cv::Mat::zeros(src.size(), CV_8UC1);  // overlap region
+
+  // convert b,g,r to h,s,v
+  cv::Mat &&bgr = cv::Mat(1, 1, CV_8UC3);
+  bgr.at<cv::Vec3b>(0, 0)[0] = b;
+  bgr.at<cv::Vec3b>(0, 0)[1] = g;
+  bgr.at<cv::Vec3b>(0, 0)[2] = r;
+  cv::Mat &&bgr2hsv = cv::Mat(1, 1, CV_8UC3);
+  cv::cvtColor(bgr, bgr2hsv, CV_BGR2HSV);
+  int &&lower_h = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[0]) - cvRound(90 * tolerance);
+  int &&lower_s = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[1]) - cvRound(128 * tolerance);
+  int &&lower_v = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[2]) - cvRound(128 * tolerance);
+  int &&upper_h = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[0]) + cvRound(90 * tolerance);
+  int &&upper_s = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[1]) + cvRound(128 * tolerance);
+  int &&upper_v = static_cast<int>(bgr2hsv.at<cv::Vec3b>(0, 0)[2]) + cvRound(128 * tolerance);
+  /*
+  h: 0~180  if h = -1 -> h =179 
+  s: 0~255
+  v: 0~255
+  */
+  cv::Scalar lower, upper;
+  if (lower_h < 0 || lower_s < 0 || lower_v < 0 || upper_h > 255 || upper_s > 255 || upper_v > 255) {
+    if (lower_s < 0) {
+      lower_s = 0;
+    }
+    if (lower_v < 0) {
+      lower_v = 0;
+    }
+    if (upper_s > 255) {
+      upper_s = 255;
+    }
+    if (upper_v > 255) {
+      upper_v = 255;
+    }
+    if (lower_h < 0) {
+      lower_h = lower_h + 180;
+    }
+    if (upper_h > 179) {
+      upper_h = upper_h - 180;
+    }
+    // fix the h & s
+    s_thres[0] = lower_s;
+    s_thres[1] = upper_s;
+    v_thres[0] = lower_v;
+    v_thres[1] = upper_v;
+    // 0~lower upper~255
+    cv::Mat mask1_s = cv::Mat::zeros(src.size(), src.type());
+    cv::Mat mask2_s = cv::Mat::zeros(src.size(), src.type());
+    cv::Mat mask1_gs = cv::Mat::zeros(src.size(), src.type());
+    cv::Mat mask2_gs = cv::Mat::zeros(src.size(), src.type());
+    // get mask1
+    cv::inRange(hsv_s, cv::Scalar(0, s_thres[0], v_thres[0]), cv::Scalar(upper_h, s_thres[1], v_thres[1]), mask1_s);
+    // get mask2
+    cv::inRange(hsv_s, cv::Scalar(lower_h, s_thres[0], v_thres[0]), cv::Scalar(255, s_thres[1], v_thres[1]), mask2_s);
+    // get the union of mask1 & mask2
+    cv::bitwise_or(mask1_s, mask2_s, selected_color);
+  } else {  // 沒有超過上下限的範圍
+    s_thres[0] = lower_s;
+    s_thres[1] = upper_s;
+    v_thres[0] = lower_v;
+    v_thres[1] = upper_v;
+    lower = cv::Scalar(lower_h, s_thres[0], v_thres[0]);
+    upper = cv::Scalar(upper_h, s_thres[1], v_thres[1]);
+    cv::inRange(hsv_s, lower, upper, selected_color);
+  }
+  dst = cv::Mat::zeros(selected_color.size(), selected_color.type());
+  dst = selected_color.clone();
+  return 0;
+}
+
 cv::Point TwoLineIntersection(const cv::Point &x1_start, const cv::Point &x1_end,
                               const cv::Point &x2_start, const cv::Point &x2_end) {
   // line1 : a1x + b1y = c1
@@ -267,10 +350,136 @@ cv::Point TwoLineIntersection(const cv::Point &x1_start, const cv::Point &x1_end
   const int &&y = static_cast<int>(-dalta_y / dalta);
 
   const cv::Point &&intersection = cv::Point(x, y);
-  cv::Mat mask = cv::Mat::zeros(1000, 1000, CV_8UC1);
-  cv::line(mask, pt1_start, pt1_end, uchar(255), 5);
-  cv::line(mask, pt2_start, pt2_end, uchar(128), 5);
-  cv::circle(mask, intersection, 50, uchar(50), -1);
   return intersection;
 }
+
+double GetTwoPointAngle(const cv::Point &pt0, const cv::Point &pt1) {
+  const cv::Point &&diff_pt = cv::Point((pt1.x - pt0.x), (pt1.y - pt0.y));
+  /*
+    → x
+  ↓
+  y     |
+        90
+        |
+  -180-----0---
+        |
+       270
+        |
+  */
+  // 0, 90, 180, 270
+  if ((diff_pt.x == 0) && (diff_pt.y == 0)) {
+    return 0;
+  } else if ((diff_pt.x == 0) && (diff_pt.y < 0)) {
+    return 90.0;
+  } else if ((diff_pt.x == 0) && (diff_pt.y > 0)) {
+    return 270.0;
+  } else if ((diff_pt.x < 0) && (diff_pt.y == 0)) {
+    return 180.0;
+  } else if ((diff_pt.x > 0) && (diff_pt.y == 0)) {
+    return 0;
+  }
+  double &&angle = 0;
+  double &&temp = 0;
+  temp = std::fabsf(float(diff_pt.y) / float(diff_pt.x));
+  temp = std::atan(temp);
+  temp = temp * 180 / CV_PI;
+  if ((0 < diff_pt.x) && (0 < diff_pt.y)) {
+    angle = 360 - temp;
+    return angle;
+  }
+  if ((0 > diff_pt.x) && (0 < diff_pt.y)) {
+    angle = 360 - (180 - temp);
+    return angle;
+  }
+  if ((0 < diff_pt.x) && (0 > diff_pt.y)) {
+    angle = temp;
+    return angle;
+  }
+  if ((0 > diff_pt.x) && (0 > diff_pt.y)) {
+    angle = 180 - temp;
+    return angle;
+  }
+  std::cout << "\nERROR: double GetTwoPointAngle" << std::endl;
+  return -1;
+}
+
+int GetNewRotatedImageSize(const cv::Mat &src,
+                           const double &angle, int &width, int &height) {
+  // check input
+  if (src.empty()) {
+    std::cout << "int GetNewRotatedImageSize --(cv::Mat)src.empty()" << std::endl;
+    return -1;
+  }
+  const int &width_ = src.cols;
+  const int &height_ = src.rows;
+  const cv::Point &&image_center = cv::Point(width_ / 2, height_ / 2);
+  const cv::Mat &&rotation_mat = cv::getRotationMatrix2D(image_center, -angle, 1.0);
+  const double &&abs_cos = std::abs(rotation_mat.at<double>(0, 0));
+  const double &&abs_sin = std::abs(rotation_mat.at<double>(0, 1));
+
+  width = static_cast<int>(height_ * abs_sin + width_ * abs_cos);
+  height = static_cast<int>(height_ * abs_cos + width_ * abs_sin);
+  return 0;
+}
+
+cv::Mat ImageRotateByCenter(const cv::Mat &src, const double &angle) {
+  // check input images
+  if (src.empty()) {
+    std::cout << "\nError: ipo::ImageRotateByCenter() --(cv::Mat)src.empty" << std::endl;
+    return {};
+  }
+
+  // std::cout << "angle : " << angle << std::endl;
+  const int &width = src.cols;
+  const int &height = src.rows;
+
+  cv::Point &&image_center = cv::Point(width / 2, height / 2);
+  cv::Mat &&rotation_mat = cv::getRotationMatrix2D(image_center, angle, 1.0);
+
+  double &&abs_cos = std::abs(rotation_mat.at<double>(0, 0));
+  double &&abs_sin = std::abs(rotation_mat.at<double>(0, 1));
+
+  const int &&bound_w = static_cast<int>(height * abs_sin + width * abs_cos);
+  const int &&bound_h = static_cast<int>(height * abs_cos + width * abs_sin);
+
+  rotation_mat.at<double>(0, 2) += bound_w / 2 - image_center.x;
+  rotation_mat.at<double>(1, 2) += bound_h / 2 - image_center.y;
+
+  cv::Mat &&dst = cv::Mat::zeros(cv::Size(bound_w, bound_h), src.type());
+  cv::warpAffine(src, dst, rotation_mat, cv::Size(bound_w, bound_h), cv::INTER_CUBIC);
+
+  // cv::imshow("SADASDASDdst", dst);
+  // cv::waitKey(0);
+
+  return dst.clone();
+}
+
+cv::Mat ImageRotate(const cv::Mat &src, const double &angle, const cv::Point &center) {
+  // check input images
+  if (src.empty()) {
+    std::cout << "\nError: ImageRotate() --(cv::Mat)src.empty()" << std::endl;
+    return {};
+  }
+  cv::Mat &&dst = cv::Mat::zeros(src.size(), src.type());
+  cv::Mat &&rotate_matrix = cv::getRotationMatrix2D(center, -angle, 1.0);
+  cv::warpAffine(src, dst, rotate_matrix, src.size(), cv::INTER_CUBIC);
+  return dst.clone();
+}
+
+cv::Mat ImageShift(const cv::Mat &src, const cv::Point2f &from_pt, const cv::Point2f &to_pt) {
+  // check input images
+  if (src.empty()) {
+    std::cout << "\nError: ImageRotate() --src is empty" << std::endl;
+    return {};
+  }
+  cv::Mat &&dst = cv::Mat::zeros(src.size(), src.type());
+  const double &&dx = to_pt.x - from_pt.x;
+  const double &&dy = to_pt.y - from_pt.y;
+  std::cout << "dx : " << dx << std::endl;
+  std::cout << "dy : " << dy << std::endl;
+  cv::Mat shift_mat = (cv::Mat_<double>(2, 3) << 1, 0, dx, 0, 1, dy);
+  cv::warpAffine(src, dst, shift_mat, dst.size());
+  return dst.clone();
+}
+
 }  // namespace ipo

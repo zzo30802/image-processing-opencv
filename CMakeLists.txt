@@ -80,11 +80,13 @@ ENDIF()
 
   
 # code
-include_directories(${CMAKE_SOURCE_DIR}/include)	     # ./include
-aux_source_directory(./src DIR_SRCS)                         # cpp
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include/component)
+aux_source_directory(./src SRC)  
+aux_source_directory(./src/component SRC_COMPONENT)                       # cpp
 
 # output binary
-add_executable(${PROJECT_NAME} main.cpp ${DIR_SRCS} )
+add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT})
 # output so
 #add_library( ${PROJECT_NAME} SHARED ${SRC} )
 # link library
