@@ -5,47 +5,30 @@
 #include "common.h"
 #include "image_proc.h"
 namespace ipo {
-enum class PositioningTypeEnums {
+enum PositioningTypeEnums {
   FEATURE_MATCHING = 0,
   TEMPLATE_MATCHING = 1,
 };
-enum class PositioningRectEnums {
+enum PositioningRectEnums {
   TEMPLATE_IMG_RECT = 0,
   SEARCHING_IMG_RECT = 1,
 };
-enum class FeatureAttributeEnums {
+enum FeatureAttributeEnums {
   HESSIAN_THRESHOLD = 0,  // 100~3000
   LOWE_RATIO = 1,         // 0~1.0f
 };
-enum class TemplateAttributeEnums {
+enum TemplateAttributeEnums {
   ANGLE_TOLERANCE = 0,
   NUMBER_OF_LEVELS = 1,
   THRESHOLD_SCORE = 2,
 };
-// class IPositioning {
-//  public:
-//   virtual int SetGoldenSampleImage(const cv::Mat &golden_sample_img) = 0;
-//   virtual int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) = 0;
-//   virtual int SetAttribute() = 0;
-//   virtual cv::Mat GetResult(const cv::Mat &sample_img) = 0;
-
-//  protected:
-//   cv::Mat golden_sample_image;
-//   cv::Rect template_rect;
-//   cv::Rect searching_rect;
-// };
 
 class IPositioning {
  public:
   virtual int SetGoldenSampleImage(const cv::Mat &golden_sample_img) = 0;
   virtual int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) = 0;
-  virtual int SetAttribute(const FeatureAttributeEnums &attri, float value) = 0;
+  virtual int SetAttribute(const int &attribute_type, const float &value) = 0;
   virtual cv::Mat GetResult(const cv::Mat &sample_img) = 0;
-
-  //  protected:
-  //   cv::Mat golden_sample_image;
-  //   cv::Rect template_rect;
-  //   cv::Rect searching_rect;
 };
 
 class FeatureMatching : public IPositioning {
@@ -53,7 +36,7 @@ class FeatureMatching : public IPositioning {
   int SetGoldenSampleImage(const cv::Mat &golden_sample_img);
   int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect);
   // template <typename T>
-  int SetAttribute(const FeatureAttributeEnums &attri, float value);
+  int SetAttribute(const int &attribute_type, const float &value);
   cv::Mat GetResult(const cv::Mat &sample_img);
 
  private:
@@ -73,7 +56,7 @@ class FeatureMatching : public IPositioning {
 //   int SetGoldenSampleImage(const cv::Mat &golden_sample_img);
 //   int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect);
 //   // template <typename T>
-//   int SetAttribute(const TemplateAttributeEnums &attri, const float &value);
+//   int SetAttribute(const int &attribute_type, const float &value);
 //   cv::Mat GetResult(const cv::Mat &sample_img);
 
 //  private:
@@ -91,16 +74,17 @@ class Creator {
   // virtual void Create(const PositioningTypeEnums &type) = 0;
 };
 
-class Positioning : public Creator, public FeatureMatching {
+class Positioning : public Creator {
  public:
   Positioning(const PositioningTypeEnums &type) {
     switch (type) {
       case PositioningTypeEnums::FEATURE_MATCHING: {
+        this->ptr_index = 0;
         ptr = new FeatureMatching();
-        // #define xxx 1
         break;
       }
       case PositioningTypeEnums::TEMPLATE_MATCHING: {
+        this->ptr_index = 1;
         break;
       }
       default: {
@@ -125,25 +109,16 @@ class Positioning : public Creator, public FeatureMatching {
     }
     return 0;
   }
-  int SetAttribute(const FeatureAttributeEnums &attri, float value) {
-    if (ptr->SetAttribute(attri, value) != 0)
+  int SetAttribute(const int &attribute_type, float value) {
+    if (ptr->SetAttribute(attribute_type, value) != 0)
       return -1;
     return 0;
   }
-  // #if xxx == 1
-  //   // int Set1(){};
-  //   int SetAttribute(const FeatureAttributeEnums &attri, const float &value){};
-  // #elif xxx == 2
-  //   // int Set2(){};
-  //   int SetAttribute(){};
-  //   // nt SetAttribute(const FeatureAttributeEnums &attri, const float &value){};
-  // #endif
-
   cv::Mat GetResult(const cv::Mat &sample_img) {
     return ptr->GetResult(sample_img);
   }
 
- public:
+ private:
   IPositioning *ptr;
 };
 

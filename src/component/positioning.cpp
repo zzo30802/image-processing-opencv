@@ -36,9 +36,9 @@ int FeatureMatching::SetRect(const PositioningRectEnums &rect_type, const cv::Re
 }
 
 // template <typename T>
-int FeatureMatching::SetAttribute(const FeatureAttributeEnums &attri, float value) {
-  switch (attri) {
-    case FeatureAttributeEnums::HESSIAN_THRESHOLD: {
+int FeatureMatching::SetAttribute(const int &attribute_type, const float &value) {
+  switch (attribute_type) {
+    case static_cast<int>(FeatureAttributeEnums::HESSIAN_THRESHOLD): {
       if (value < 100) {
         std::cout << "\nERROR: int FeatureMatching::SetAttribute" << std::endl;
         std::cout << "    100 < int HESSIAN_THRESHOLD < 3000" << std::endl;
@@ -54,7 +54,7 @@ int FeatureMatching::SetAttribute(const FeatureAttributeEnums &attri, float valu
       std::cout << "HESSIAN_THRESHOLD 2" << std::endl;
       break;
     }
-    case FeatureAttributeEnums::LOWE_RATIO: {
+    case static_cast<int>(FeatureAttributeEnums::LOWE_RATIO): {
       if (value < 0) {
         std::cout << "\nERROR: int FeatureMatching::SetAttribute" << std::endl;
         std::cout << "    0 < float LOWE_RATIO < 1.0f" << std::endl;
