@@ -434,7 +434,7 @@ cv::Mat ImageRotateByCenter(const cv::Mat &src, const double &angle) {
   const int &height = src.rows;
 
   cv::Point &&image_center = cv::Point(width / 2, height / 2);
-  cv::Mat &&rotation_mat = cv::getRotationMatrix2D(image_center, angle, 1.0);
+  cv::Mat &&rotation_mat = cv::getRotationMatrix2D(image_center, -angle, 1.0);
 
   double &&abs_cos = std::abs(rotation_mat.at<double>(0, 0));
   double &&abs_sin = std::abs(rotation_mat.at<double>(0, 1));
@@ -447,10 +447,6 @@ cv::Mat ImageRotateByCenter(const cv::Mat &src, const double &angle) {
 
   cv::Mat &&dst = cv::Mat::zeros(cv::Size(bound_w, bound_h), src.type());
   cv::warpAffine(src, dst, rotation_mat, cv::Size(bound_w, bound_h), cv::INTER_CUBIC);
-
-  // cv::imshow("SADASDASDdst", dst);
-  // cv::waitKey(0);
-
   return dst.clone();
 }
 

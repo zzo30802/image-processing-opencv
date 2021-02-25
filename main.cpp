@@ -16,7 +16,7 @@ index:
 8 : positioning by feature matching(SURF)
 9 : positioning by template matching
 */
-#define index 8
+#define index 9
 
 #if index == 1
 // DynamicThreshold
@@ -117,6 +117,34 @@ int main() {
   if (position_obj->SetAttribute(ipo::FeatureAttributeEnums::HESSIAN_THRESHOLD, 100.0f) != 0)
     return -1;
   if (position_obj->SetAttribute(ipo::FeatureAttributeEnums::LOWE_RATIO, 0.9f) != 0)
+    return -1;
+  cv::Mat &&dst = position_obj->GetResult(sample);
+  if (dst.empty())
+    return -1;
+  cv::imshow("dst", dst);
+  cv::waitKey(0);
+}
+#elif index == 9
+int main() {
+  //----Load images----
+  cv::Mat &&golden_sample = cv::imread("../images/positioning/golden_sample.jpg");
+  cv::Mat &&sample = cv::imread("../images/positioning/sample.jpg");
+  //----cropped rect----
+  cv::Rect &&searching_rect = cv::Rect(126, 95, 630, 560);
+  cv::Rect &&template_rect = cv::Rect(313, 231, 240, 206);
+
+  std::shared_ptr<ipo::Positioning> &&position_obj = std::make_shared<ipo::Positioning>(ipo::PositioningTypeEnums::TEMPLATE_MATCHING);
+  if (position_obj->SetGoldenSampleImage(golden_sample) != 0)
+    return -1;
+  if (position_obj->SetRect(ipo::PositioningRectEnums::SEARCHING_IMG_RECT, searching_rect) != 0)
+    return -1;
+  if (position_obj->SetRect(ipo::PositioningRectEnums::TEMPLATE_IMG_RECT, template_rect) != 0)
+    return -1;
+  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::ANGLE_TOLERANCE, 30) != 0)
+    return -1;
+  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::NUMBER_OF_LEVELS, 2) != 0)
+    return -1;
+  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::THRESHOLD_SCORE, 0.8) != 0)
     return -1;
   cv::Mat &&dst = position_obj->GetResult(sample);
   if (dst.empty())

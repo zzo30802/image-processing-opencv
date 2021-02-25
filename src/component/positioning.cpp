@@ -1,13 +1,16 @@
 #include "positioning.h"
+
+#include "image_proc.h"
+
 using namespace ipo;
 //===========FeatureMatching============
-int FeatureMatching::SetGoldenSampleImage(const cv::Mat &src) {
-  if (src.empty()) {
+int FeatureMatching::SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
+  if (golden_sample_img.empty()) {
     std::cout << "\nERROR: int ipo::FeatureMatching::SetGoldenSampleImage --(cv::Mat)src.empty()" << std::endl;
     return -1;
   }
-  this->golden_sample_image = cv::Mat::zeros(src.size(), src.type());
-  this->golden_sample_image = src.clone();
+  this->golden_sample_image = cv::Mat::zeros(golden_sample_img.size(), golden_sample_img.type());
+  this->golden_sample_image = golden_sample_img.clone();
   return 0;
 }
 
@@ -36,9 +39,9 @@ int FeatureMatching::SetRect(const PositioningRectEnums &rect_type, const cv::Re
 }
 
 // template <typename T>
-int FeatureMatching::SetAttribute(const int &attribute_type, const float &value) {
+int FeatureMatching::SetAttribute(const int &attribute_type, const double &value) {
   switch (attribute_type) {
-    case static_cast<int>(FeatureAttributeEnums::HESSIAN_THRESHOLD): {
+    case FeatureAttributeEnums::HESSIAN_THRESHOLD: {
       if (value < 100) {
         std::cout << "\nERROR: int FeatureMatching::SetAttribute" << std::endl;
         std::cout << "    100 < int HESSIAN_THRESHOLD < 3000" << std::endl;
@@ -48,13 +51,10 @@ int FeatureMatching::SetAttribute(const int &attribute_type, const float &value)
         std::cout << "    100 < int HESSIAN_THRESHOLD < 3000" << std::endl;
         return -1;
       }
-      std::cout << "HESSIAN_THRESHOLD 1" << std::endl;
-      std::cout << value << std::endl;
       this->hessian_threshold = static_cast<int>(value);
-      std::cout << "HESSIAN_THRESHOLD 2" << std::endl;
       break;
     }
-    case static_cast<int>(FeatureAttributeEnums::LOWE_RATIO): {
+    case FeatureAttributeEnums::LOWE_RATIO: {
       if (value < 0) {
         std::cout << "\nERROR: int FeatureMatching::SetAttribute" << std::endl;
         std::cout << "    0 < float LOWE_RATIO < 1.0f" << std::endl;
@@ -64,10 +64,7 @@ int FeatureMatching::SetAttribute(const int &attribute_type, const float &value)
         std::cout << "    0 < float LOWE_RATIO < 1.0f" << std::endl;
         return -1;
       }
-      std::cout << "LOWE_RATIO 1" << std::endl;
-      std::cout << value << std::endl;
       this->lowe_ratio = static_cast<float>(value);
-      std::cout << "LOWE_RATIO 2" << std::endl;
       break;
     }
     default: {
@@ -80,6 +77,11 @@ int FeatureMatching::SetAttribute(const int &attribute_type, const float &value)
 }
 
 cv::Mat FeatureMatching::GetHomography(const cv::Mat &sample_img) {
+  // check input
+  if (sample_img.empty()) {
+    std::cout << "\nERROR: int ipo::FeatureMatching::GetHomography --(cv::Mat)sample_img.empty()" << std::endl;
+    return {};
+  }
   // print all input attribute
   std::cout << "hessian_threshold: " << this->hessian_threshold << std::endl;
   std::cout << "lowe_ratio: " << this->lowe_ratio << std::endl;
@@ -187,3 +189,209 @@ cv::Mat FeatureMatching::GetResult(const cv::Mat &sample_img) {
 }
 
 //===========TemplateMatching============
+int TemplateMatching::SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
+  if (golden_sample_img.empty()) {
+    std::cout << "\nERROR: int ipo::TemplateMatching::SetGoldenSampleImage --(cv::Mat)src.empty()" << std::endl;
+    return -1;
+  }
+  this->golden_sample_image = cv::Mat::zeros(golden_sample_img.size(), golden_sample_img.type());
+  this->golden_sample_image = golden_sample_img.clone();
+  return 0;
+}
+
+int TemplateMatching::SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) {
+  // check input
+  if (rect.empty()) {
+    std::cout << "\nERROR: int TemplateMatching::SetRect --(cv::Rect)rect.empty()" << std::endl;
+    return -1;
+  }
+  switch (rect_type) {
+    case PositioningRectEnums::TEMPLATE_IMG_RECT: {
+      this->template_rect = rect;
+      break;
+    }
+    case PositioningRectEnums::SEARCHING_IMG_RECT: {
+      this->searching_rect = rect;
+      break;
+    }
+    default: {
+      std::cout << "\nERROR: int TemplateMatching::SetRect" << std::endl;
+      std::cout << "    (enum)PositioningRectEnums : There is no such enum in the enumeration list." << std::endl;
+      return -1;
+    }
+  }
+  return 0;
+}
+
+int TemplateMatching::SetAttribute(const int &attribute_type, const double &value) {
+  switch (attribute_type) {
+    case TemplateAttributeEnums::ANGLE_TOLERANCE: {
+      if (value < 0.0) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < double angle_tolerance <= 180" << std::endl;
+        return -1;
+      } else if (value > 180.0) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < double angle_tolerance <= 180" << std::endl;
+        return -1;
+      }
+      this->angle_tolerance = static_cast<double>(value);
+      break;
+    }
+    case TemplateAttributeEnums::NUMBER_OF_LEVELS: {
+      if (value < 1) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < int number_of_levels <= 5" << std::endl;
+        return -1;
+      } else if (value > 5) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < int number_of_levels <= 5" << std::endl;
+        return -1;
+      }
+      this->number_of_levels = static_cast<int>(value);
+      break;
+    }
+    case TemplateAttributeEnums::THRESHOLD_SCORE: {
+      if (value < 0) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < double threshold_score <= 1.0" << std::endl;
+        return -1;
+      } else if (value > 1.0) {
+        std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+        std::cout << "    0 < double threshold_score <= 1.0" << std::endl;
+        return -1;
+      }
+      this->similarity_score = static_cast<double>(value);
+      break;
+    }
+    default: {
+      std::cout << "\nERROR: int TemplateMatching::SetAttribute" << std::endl;
+      std::cout << "    (enum)TemplateAttributeEnums : There is no such enum in the enumeration list." << std::endl;
+      return -1;
+    }
+  }
+  return 0;
+}
+
+cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
+  // check input
+  if (sample_img.empty()) {
+    std::cout << "\nERROR: cv::Mat ipo::TemplateMatching::GetResult --(cv::Mat)sample_img.empty()" << std::endl;
+    return {};
+  }
+
+  // print all input attribute
+  std::cout << "angle_tolerance: " << this->angle_tolerance << std::endl;
+  std::cout << "number_of_levels: " << this->number_of_levels << std::endl;
+  std::cout << "similarity_score: " << this->similarity_score << std::endl;
+
+  // crop image (template & searching)
+  this->template_img = cv::Mat::zeros(sample_img.size(), sample_img.type());
+  this->golden_sample_image(this->template_rect).copyTo(template_img);
+  this->searching_img = cv::Mat::zeros(sample_img.size(), sample_img.type());
+  sample_img(this->searching_rect).copyTo(searching_img);
+
+  // create cv::Mat
+  // searching && template image
+  cv::Mat &&gray_searching = cv::Mat::zeros(this->searching_img.size(), CV_8UC1);
+  cv::Mat &&gray_template = cv::Mat::zeros(this->template_img.size(), CV_8UC1);
+  // original image (for finding the global coordinate)
+  cv::Mat &&global_gray_searching = cv::Mat::zeros(sample_img.size(), CV_8UC1);
+  cv::Mat &&global_gray_template = cv::Mat::zeros(this->template_img.size(), CV_8UC1);
+  const int &&channel = sample_img.channels();
+  switch (channel) {
+    case 1: {
+      //----searching && template image----
+      gray_searching = this->searching_img.clone();
+      gray_template = this->template_img.clone();
+      //----the original size image----
+      global_gray_searching = sample_img.clone();
+      global_gray_template = this->template_img.clone();
+      break;
+    }
+    case 3: {
+      //----searching && template image----
+      cv::cvtColor(this->searching_img, gray_searching, cv::COLOR_BGR2GRAY, 1);
+      cv::cvtColor(this->template_img, gray_template, cv::COLOR_BGR2GRAY, 1);
+      //----the original size image----
+      cv::cvtColor(sample_img, global_gray_searching, cv::COLOR_BGR2GRAY, 1);
+      cv::cvtColor(this->template_img, global_gray_template, cv::COLOR_BGR2GRAY, 1);
+      break;
+    }
+    default: {
+      std::cout << "\nERROR: cv::Mat ipo::TemplateMatching::GetResult" << std::endl;
+      std::cout << "    image channel must be equal to 1 or 3" << std::endl;
+      return {};
+    }
+  }
+  // image Pyramids (downsize, zoom out)
+  for (size_t i = 0; i < this->number_of_levels; i++) {
+    cv::pyrDown(gray_searching, gray_searching, cv::Size(gray_searching.cols / 2, gray_searching.rows / 2));
+    cv::pyrDown(gray_template, gray_template, cv::Size(gray_template.cols / 2, gray_template.rows / 2));
+  }
+
+  double &&min_angle = -(this->angle_tolerance);
+  double &max_angle = this->angle_tolerance;
+  double &&angle_range = std::abs(min_angle) + std::abs(max_angle);
+  const double &start = min_angle;
+  std::cout << "angle_range : " << angle_range << std::endl;
+  std::cout << "start : " << start << std::endl;
+
+  const double &accuracy = 0.1;
+
+  double &&minVal = 0;
+  double &&maxVal = 0;
+  cv::Point minLoc, maxLoc, location;
+  double &&temp_max = 0;
+  double &&angle = 0;
+  int &&width = gray_searching.cols - gray_template.cols + 1;
+  int &&height = gray_searching.rows - gray_template.rows + 1;
+  cv::Mat &&result_img = cv::Mat::zeros(width, height, CV_8UC1);
+
+  // calculate once first
+  cv::matchTemplate(gray_searching, gray_template, result_img, cv::TM_CCOEFF_NORMED);
+  cv::minMaxLoc(result_img, &minVal, &maxVal, &minLoc, &maxLoc, cv::noArray());
+  location = maxLoc;
+  temp_max = maxVal;
+
+  // rotate loop (find angle)
+  cv::Mat rotated_gray_searching;
+  for (int i = 0; i < static_cast<int>(angle_range / accuracy) - 1; i++) {
+    const double &&current_angle = start + accuracy * i;
+    if (GetNewRotatedImageSize(gray_searching, current_angle, width, height) != 0)
+      return {};
+    width = gray_searching.cols - gray_template.cols + 1;
+    height = gray_searching.rows - gray_template.rows + 1;
+    result_img = cv::Mat::zeros(width, height, CV_8UC1);
+    rotated_gray_searching = cv::Mat::zeros(width, height, CV_8UC1);
+    rotated_gray_searching = ImageRotateByCenter(gray_searching, -current_angle);
+    cv::matchTemplate(rotated_gray_searching, gray_template, result_img, cv::TM_CCOEFF_NORMED);
+    cv::minMaxLoc(result_img, &minVal, &maxVal, &minLoc, &maxLoc, cv::noArray());
+    if (maxVal > temp_max) {
+      location = maxLoc;
+      temp_max = maxVal;
+      angle = current_angle;
+    }
+  }
+  std::cout << "angle : " << angle << std::endl;
+
+  // rotate image
+  global_gray_searching = ImageRotate(global_gray_searching, -angle, cv::Point(global_gray_searching.cols / 2, global_gray_searching.rows / 2));
+  cv::imshow("global_gray_searching", global_gray_searching);
+  // find global coordinate
+  width = global_gray_searching.cols - global_gray_template.cols + 1;
+  height = global_gray_searching.rows - global_gray_template.rows + 1;
+  result_img = cv::Mat::zeros(width, height, CV_8UC1);
+  cv::matchTemplate(global_gray_searching, global_gray_template, result_img, cv::TM_CCOEFF_NORMED);
+  cv::minMaxLoc(result_img, &minVal, &maxVal, &minLoc, &maxLoc, cv::noArray());
+
+  // result
+  cv::Mat &&dst = cv::Mat::zeros(sample_img.size(), sample_img.type());
+  dst = sample_img.clone();
+
+  // dst = ImageRotateByCenter(dst, -angle);
+  dst = ImageRotate(dst, -angle, cv::Point(dst.cols / 2, dst.rows / 2));
+
+  dst = ImageShift(dst, maxLoc, cv::Point(template_rect.x, template_rect.y));
+  return dst.clone();
+}
