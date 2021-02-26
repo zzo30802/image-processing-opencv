@@ -1,5 +1,6 @@
 #include "component/image_proc.h"
 
+#include "common.h"
 #include "component/positioning.h"
 
 namespace ipo {
@@ -422,10 +423,10 @@ int GetNewRotatedImageSize(const cv::Mat &src,
   return 0;
 }
 
-cv::Mat ImageRotateByCenter(const cv::Mat &src, const double &angle) {
+cv::Mat ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src, const double &angle) {
   // check input images
   if (src.empty()) {
-    std::cout << "\nError: ipo::ImageRotateByCenter() --(cv::Mat)src.empty" << std::endl;
+    std::cout << "\nError: ipo::ImageRotateByCenterAndAdjustBoundary() --(cv::Mat)src.empty" << std::endl;
     return {};
   }
 

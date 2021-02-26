@@ -364,7 +364,7 @@ cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
     height = gray_searching.rows - gray_template.rows + 1;
     result_img = cv::Mat::zeros(width, height, CV_8UC1);
     rotated_gray_searching = cv::Mat::zeros(width, height, CV_8UC1);
-    rotated_gray_searching = ImageRotateByCenter(gray_searching, -current_angle);
+    rotated_gray_searching = ImageRotateByCenterAndAdjustBoundary(gray_searching, -current_angle);
     cv::matchTemplate(rotated_gray_searching, gray_template, result_img, cv::TM_CCOEFF_NORMED);
     cv::minMaxLoc(result_img, &minVal, &maxVal, &minLoc, &maxLoc, cv::noArray());
     if (maxVal > temp_max) {
@@ -377,7 +377,6 @@ cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
 
   // rotate image
   global_gray_searching = ImageRotate(global_gray_searching, -angle, cv::Point(global_gray_searching.cols / 2, global_gray_searching.rows / 2));
-  cv::imshow("global_gray_searching", global_gray_searching);
   // find global coordinate
   width = global_gray_searching.cols - global_gray_template.cols + 1;
   height = global_gray_searching.rows - global_gray_template.rows + 1;
@@ -388,10 +387,7 @@ cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
   // result
   cv::Mat &&dst = cv::Mat::zeros(sample_img.size(), sample_img.type());
   dst = sample_img.clone();
-
-  // dst = ImageRotateByCenter(dst, -angle);
   dst = ImageRotate(dst, -angle, cv::Point(dst.cols / 2, dst.rows / 2));
-
   dst = ImageShift(dst, maxLoc, cv::Point(template_rect.x, template_rect.y));
   return dst.clone();
 }

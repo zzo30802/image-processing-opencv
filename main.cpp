@@ -15,6 +15,7 @@ index:
 ------positioning------
 8 : positioning by feature matching(SURF)
 9 : positioning by template matching
+10 : 
 */
 #define index 9
 
@@ -86,6 +87,7 @@ int main() {
   return 0;
 }
 #elif index == 7
+// GetNewRotatedImageSize()
 int main() {
   cv::resize(src, src, cv::Size(), 0.6, 0.6);
 
@@ -99,6 +101,7 @@ int main() {
   return 0;
 }
 #elif index == 8
+// positioning by feature matching(SURF)
 int main() {
   //----Load images----
   cv::Mat &&golden_sample = cv::imread("../images/positioning/golden_sample.jpg");
@@ -125,6 +128,7 @@ int main() {
   cv::waitKey(0);
 }
 #elif index == 9
+// positioning by template matching
 int main() {
   //----Load images----
   cv::Mat &&golden_sample = cv::imread("../images/positioning/golden_sample.jpg");
@@ -152,4 +156,6 @@ int main() {
   cv::imshow("dst", dst);
   cv::waitKey(0);
 }
+#elif index == 10
+
 #endif

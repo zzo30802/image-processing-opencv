@@ -1,7 +1,11 @@
 #ifndef _IMAGE_PROC_H_
 #define _IMAGE_PROC_H_
 
-#include "common.h"
+// #include "common.h"
+// #include "opencv2/highgui.hpp"
+// #include "opencv2/imgcodecs.hpp"
+#include "opencv2/core.hpp"
+// #include "opencv2/imgproc.hpp"
 
 namespace ipo {
 
@@ -46,15 +50,8 @@ cv::Point TwoLineIntersection(const cv::Point &x1_start, const cv::Point &x1_end
                               const cv::Point &x2_start, const cv::Point &x2_end);
 double GetTwoPointAngle(const cv::Point &pt0, const cv::Point &pt1);
 int GetNewRotatedImageSize(const cv::Mat &src, const double &angle, int &width, int &height);
-cv::Mat ImageRotateByCenter(const cv::Mat &src, const double &angle);
+cv::Mat ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src, const double &angle);
 cv::Mat ImageRotate(const cv::Mat &src, const double &angle, const cv::Point &center);
 cv::Mat ImageShift(const cv::Mat &src, const cv::Point2f &from_pt, const cv::Point2f &to_pt);
-
-// cv::Mat PositioningByFeatureMatching(const cv::Mat &golden_sample_img,
-//                                      const cv::Mat sample_img,
-//                                      const cv::Rect &template_rect,
-//                                      const cv::Rect &searching_rect,
-//                                      const int &hessian_threshold,
-//                                      const float &lowe_ratio);
 }  // namespace ipo
 #endif  // _IMAGE_PROC_H_

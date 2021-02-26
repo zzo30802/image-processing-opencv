@@ -88,7 +88,7 @@ aux_source_directory(./src/component SRC_COMPONENT)                       # cpp
 # output binary
 add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT})
 # output so
-#add_library( ${PROJECT_NAME} SHARED ${SRC} )
+#add_library( ${PROJECT_NAME} SHARED ${SRC} ${SRC_COMPONENT})
 # link library
 
 IF (WIN32)

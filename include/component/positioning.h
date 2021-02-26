@@ -1,6 +1,5 @@
 #ifndef _POSITIONING_H_
 #define _POSITIONING_H_
-#include <memory>
 
 #include "common.h"
 #include "image_proc.h"
@@ -62,6 +61,7 @@ class TemplateMatching : public IPositioning {
   // template <typename T>
   int SetAttribute(const int &attribute_type, const double &value);
   cv::Mat GetResult(const cv::Mat &sample_img);
+  int GG(){};
 
  private:
   //----cv::Rect----
@@ -77,6 +77,7 @@ class TemplateMatching : public IPositioning {
   double similarity_score;
 };
 
+//=========method 1=========
 class Creator {
  public:
   // virtual void Create(const PositioningTypeEnums &type) = 0;
@@ -128,6 +129,26 @@ class Positioning : public Creator {
  private:
   IPositioning *ptr;
 };
+
+//=========method 2=========
+// class Creator {
+//  public:
+//   virtual IPositioning *GetInstance(const PositioningTypeEnums &type) = 0;
+// };
+// class Positioning : public Creator {
+//  public:
+//   IPositioning *GetInstance(const PositioningTypeEnums &type) {
+//     switch (type) {
+//       case PositioningTypeEnums::FEATURE_MATCHING: {
+//         return new FeatureMatching();
+//       }
+//       case PositioningTypeEnums::TEMPLATE_MATCHING: {
+//         return new TemplateMatching();
+//       }
+//     }
+//   }
+
+// };
 
 // class Positioning {
 //  public:
