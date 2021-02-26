@@ -479,4 +479,6 @@ cv::Mat ImageShift(const cv::Mat &src, const cv::Point2f &from_pt, const cv::Poi
   return dst.clone();
 }
 
+//====PositioningCreator====
+
 }  // namespace ipo

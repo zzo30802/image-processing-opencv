@@ -3,6 +3,24 @@
 #include "image_proc.h"
 
 using namespace ipo;
+
+//===========PIMPL (Positioning)===========
+// Positioning::Positioning() : p_pimplPositioning(new PimplPositioning){}
+Positioning::Positioning(const PositioningTypeEnums &type) : p_pimplPositioning(new PimplPositioning(type)) {}
+Positioning::~Positioning() {}
+int Positioning::SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
+  return p_pimplPositioning->SetGoldenSampleImage(golden_sample_img);
+}
+int Positioning::SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) {
+  return p_pimplPositioning->SetRect(rect_type, rect);
+}
+int Positioning::SetAttribute(const int &attribute_type, const double &value) {
+  return p_pimplPositioning->SetAttribute(attribute_type, value);
+}
+cv::Mat Positioning::GetResult(const cv::Mat &sample_img) {
+  return p_pimplPositioning->GetResult(sample_img);
+}
+
 //===========FeatureMatching============
 int FeatureMatching::SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
   if (golden_sample_img.empty()) {
@@ -390,4 +408,46 @@ cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
   dst = ImageRotate(dst, -angle, cv::Point(dst.cols / 2, dst.rows / 2));
   dst = ImageShift(dst, maxLoc, cv::Point(template_rect.x, template_rect.y));
   return dst.clone();
+}
+
+//====class Positioning====
+Positioning::PimplPositioning::PimplPositioning(const PositioningTypeEnums &type) {
+  switch (type) {
+    case PositioningTypeEnums::FEATURE_MATCHING: {
+      this->ptr = new FeatureMatching();
+      break;
+    }
+    case PositioningTypeEnums::TEMPLATE_MATCHING: {
+      this->ptr = new TemplateMatching();
+      break;
+    }
+    default: {
+      std::cout << "(enum)PositioningTypeEnums There is no such enum in the enumeration list." << std::endl;
+      std::cout << "Switch to the default algorithm : TemplateMatching" << std::endl;
+      break;
+    }
+  }
+}
+Positioning::PimplPositioning::~PimplPositioning() {
+  delete this->ptr;
+}
+int Positioning::PimplPositioning::SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
+  if (this->ptr->SetGoldenSampleImage(golden_sample_img) != 0) {
+    return -1;
+  }
+  return 0;
+}
+int Positioning::PimplPositioning::SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) {
+  if (this->ptr->SetRect(rect_type, rect) != 0) {
+    return -1;
+  }
+  return 0;
+}
+int Positioning::PimplPositioning::SetAttribute(const int &attribute_type, const double &value) {
+  if (this->ptr->SetAttribute(attribute_type, value) != 0)
+    return -1;
+  return 0;
+}
+cv::Mat Positioning::PimplPositioning::GetResult(const cv::Mat &sample_img) {
+  return this->ptr->GetResult(sample_img);
 }

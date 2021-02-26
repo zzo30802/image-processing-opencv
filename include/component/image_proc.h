@@ -1,21 +1,12 @@
 #ifndef _IMAGE_PROC_H_
 #define _IMAGE_PROC_H_
 
-// #include "common.h"
-// #include "opencv2/highgui.hpp"
-// #include "opencv2/imgcodecs.hpp"
+#include "attribute.h"
 #include "opencv2/core.hpp"
-// #include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgcodecs.hpp"
 
 namespace ipo {
-
-enum class DynamicThresholdTypes {
-  DYNAMIC_THRES_LIGHT = 0,
-  DYNAMIC_THRES_DARK = 1,
-  DYNAMIC_THRES_LIGHT_AND_DARK_INRANGE = 2,
-  DYNAMIC_THRES_LIGHT_OR_DARK_OUTRANGE = 3,
-};
-
 /**
  * @brief Calculate the diff value between subtraction of grayscale image and fuzzy image. If the value exceed the offset value, then it equal to 255, and vice versa.
  * @param src input image.
@@ -53,5 +44,21 @@ int GetNewRotatedImageSize(const cv::Mat &src, const double &angle, int &width, 
 cv::Mat ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src, const double &angle);
 cv::Mat ImageRotate(const cv::Mat &src, const double &angle, const cv::Point &center);
 cv::Mat ImageShift(const cv::Mat &src, const cv::Point2f &from_pt, const cv::Point2f &to_pt);
+
+//====Positioning (PIMPL)====
+class Positioning {
+ public:
+  Positioning(const PositioningTypeEnums &type);
+  ~Positioning();
+  int SetGoldenSampleImage(const cv::Mat &golden_sample_img);
+  int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect);
+  int SetAttribute(const int &attribute_type, const double &value);
+  cv::Mat GetResult(const cv::Mat &sample_img);
+
+ private:
+  class PimplPositioning;
+  std::auto_ptr<PimplPositioning> p_pimplPositioning;
+};
+
 }  // namespace ipo
 #endif  // _IMAGE_PROC_H_

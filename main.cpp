@@ -1,5 +1,5 @@
 #include "component/image_proc.h"
-#include "component/positioning.h"
+
 // ---load image---
 cv::Mat &&src = cv::imread("../images/Okonomiyaki.png");
 /*
@@ -15,7 +15,7 @@ index:
 ------positioning------
 8 : positioning by feature matching(SURF)
 9 : positioning by template matching
-10 : 
+10 :
 */
 #define index 9
 
@@ -157,5 +157,6 @@ int main() {
   cv::waitKey(0);
 }
 #elif index == 10
-
+int main() {
+}
 #endif

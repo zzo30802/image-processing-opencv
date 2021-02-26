@@ -1,27 +1,10 @@
 #ifndef _POSITIONING_H_
 #define _POSITIONING_H_
 
+#include "attribute.h"
 #include "common.h"
 #include "image_proc.h"
 namespace ipo {
-enum PositioningTypeEnums {
-  FEATURE_MATCHING = 0,
-  TEMPLATE_MATCHING = 1,
-};
-enum PositioningRectEnums {
-  TEMPLATE_IMG_RECT = 0,
-  SEARCHING_IMG_RECT = 1,
-};
-enum FeatureAttributeEnums {
-  HESSIAN_THRESHOLD = 0,  // 100~3000
-  LOWE_RATIO = 1,         // 0~1.0
-};
-enum TemplateAttributeEnums {
-  ANGLE_TOLERANCE = 0,   // 0~180
-  NUMBER_OF_LEVELS = 1,  // 1~5
-  THRESHOLD_SCORE = 2,   // 0~1.0
-};
-
 class IPositioning {
  public:
   virtual int SetGoldenSampleImage(const cv::Mat &golden_sample_img) = 0;
@@ -81,53 +64,19 @@ class TemplateMatching : public IPositioning {
 class Creator {
  public:
   // virtual void Create(const PositioningTypeEnums &type) = 0;
+ protected:
+  IPositioning *ptr;
 };
 
-class Positioning : public Creator {
+class Positioning::PimplPositioning : public Creator {
  public:
-  Positioning(const PositioningTypeEnums &type) {
-    switch (type) {
-      case PositioningTypeEnums::FEATURE_MATCHING: {
-        ptr = new FeatureMatching();
-        break;
-      }
-      case PositioningTypeEnums::TEMPLATE_MATCHING: {
-        ptr = new TemplateMatching();
-        break;
-      }
-      default: {
-        std::cout << "(enum)PositioningTypeEnums There is no such enum in the enumeration list." << std::endl;
-        std::cout << "Switch to the default algorithm : TemplateMatching" << std::endl;
-        break;
-      }
-    }
-  }
-  ~Positioning() {
-    delete ptr;
-  }
-  int SetGoldenSampleImage(const cv::Mat &golden_sample_img) {
-    if (ptr->SetGoldenSampleImage(golden_sample_img) != 0) {
-      return -1;
-    }
-    return 0;
-  }
-  int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect) {
-    if (ptr->SetRect(rect_type, rect) != 0) {
-      return -1;
-    }
-    return 0;
-  }
-  int SetAttribute(const int &attribute_type, const double &value) {
-    if (ptr->SetAttribute(attribute_type, value) != 0)
-      return -1;
-    return 0;
-  }
-  cv::Mat GetResult(const cv::Mat &sample_img) {
-    return ptr->GetResult(sample_img);
-  }
-
- private:
-  IPositioning *ptr;
+  // PimplPositioning();
+  PimplPositioning(const PositioningTypeEnums &type);
+  ~PimplPositioning();
+  int SetGoldenSampleImage(const cv::Mat &golden_sample_img);
+  int SetRect(const PositioningRectEnums &rect_type, const cv::Rect &rect);
+  int SetAttribute(const int &attribute_type, const double &value);
+  cv::Mat GetResult(const cv::Mat &sample_img);
 };
 
 //=========method 2=========
