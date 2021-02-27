@@ -60,5 +60,20 @@ class Positioning {
   std::auto_ptr<PimplPositioning> p_pimplPositioning;
 };
 
+//====Flat-field correction====
+class FlatFieldCorrection {
+ public:
+  FlatFieldCorrection();
+  ~FlatFieldCorrection();
+  int SetDarkAndBrightFieldImage(const cv::Mat &dark_field_img,
+                                 const cv::Mat &bright_field_img,
+                                 const int &mean_pixel_value);
+  cv::Mat GetResult(const cv::Mat &src);
+
+ private:
+  class PimplFlatFieldCorrection;
+  std::auto_ptr<PimplFlatFieldCorrection> p_pimplFlatFieldCorrection;
+};
+
 }  // namespace ipo
 #endif  // _IMAGE_PROC_H_

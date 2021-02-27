@@ -1,5 +1,6 @@
-#include "component/image_proc.h"
+#include <iostream>
 
+#include "component/image_proc.h"
 // ---load image---
 cv::Mat &&src = cv::imread("../images/Okonomiyaki.png");
 /*
@@ -15,9 +16,10 @@ index:
 ------positioning------
 8 : positioning by feature matching(SURF)
 9 : positioning by template matching
-10 :
+------Flate-Field-Correction------
+10 : FlatFieldCorrection
 */
-#define index 9
+#define index 10
 
 #if index == 1
 // DynamicThreshold
@@ -158,5 +160,21 @@ int main() {
 }
 #elif index == 10
 int main() {
+  // image from : https://rawpedia.rawtherapee.com/File:Flatfield_landscape.jpg#file
+  //----Load images----
+  cv::Mat &&dark_field = cv::imread("../images/flat-field-correction/dark.jpg");
+  cv::Mat &&bright_field = cv::imread("../images/flat-field-correction/bright.jpg");
+  cv::Mat &&sample = cv::imread("../images/flat-field-correction/sample.jpg");
+
+  std::shared_ptr<ipo::FlatFieldCorrection> &&obj = std::make_shared<ipo::FlatFieldCorrection>();
+  if (obj->SetDarkAndBrightFieldImage(dark_field, bright_field, 200) != 0)
+    return -1;
+  cv::Mat &&dst = obj->GetResult(sample);
+  if (dst.empty()) {
+    return -1;
+  }
+  cv::imshow("dst", dst);
+  cv::waitKey(0);
+  return 0;
 }
 #endif
