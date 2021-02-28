@@ -10,8 +10,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)  ## mkdir lib
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)
 
 # Build PDB file
+# https://stackoverflow.com/questions/28178978/how-to-generate-pdb-files-for-release-build-with-cmake-flags
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+#install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION bin OPTIONAL)
 
 #set(Boost_LIBRARY_DIRS /usr/local/lib)
 #message("Opencv Found --opencv_version  " ${OpenCV_VERSION})
@@ -42,13 +44,13 @@ link_directories (${OpenCV_LIBS})
 message("OpenCV_INCLUDE_DIRS : " ${OpenCV_INCLUDE_DIRS})
 message("OpenCV_LIBS : " ${OpenCV_LIBS})
 ## BOOST
-set(BOOST_ROOT $ENV{THIRD_PARTY}/Boost/boost_1_66_0)
-set(BOOST_LIBS ${BOOST_ROOT}/lib)
-set(BOOST_INCLUDE_DIRS ${BOOST_ROOT}/include)
-include_directories( ${BOOST_INCLUDE_DIRS} )
-link_directories (${BOOST_LIBS})
-message("BOOST_INCLUDE_DIRS : " ${BOOST_INCLUDE_DIRS})
-message("BOOST_LIBS : " ${BOOST_LIBS})
+#set(BOOST_ROOT $ENV{THIRD_PARTY}/Boost/boost_1_66_0)
+#set(BOOST_LIBS ${BOOST_ROOT}/lib)
+#set(BOOST_INCLUDE_DIRS ${BOOST_ROOT}/include)
+#include_directories( ${BOOST_INCLUDE_DIRS} )
+#link_directories (${BOOST_LIBS})
+#message("BOOST_INCLUDE_DIRS : " ${BOOST_INCLUDE_DIRS})
+#message("BOOST_LIBS : " ${BOOST_LIBS})
 #---------Linux---------
 ELSE()
 ## OpenCV
@@ -56,43 +58,30 @@ find_package(OpenCV 3.4.9 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 ## BOOST
-find_package(Boost 1.55.0 COMPONENTS thread)
-include_directories(${Boost_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS}) 
-## Eigen
-#FIND_PACKAGE(Eigen3 REQUIRED)
-#include_directories(${EIGEN_INCLUDE_DIRS})
-#set(EIGEN_DIRECTORIES /home/ubuntu/workspace/eigen)
-#include_directories(${VLFEAT_DIRECTORIES})
-#message("vlfeat_include_path : " ${VLFEAT_DIRECTORIES})
-## vlfeat
-#set(VLFEAT_DIRECTORIES /home/ubuntu/workspace/vlfeat-0.9.20)
-#include_directories(${VLFEAT_DIRECTORIES})
-#message("vlfeat_include_path : " ${VLFEAT_DIRECTORIES})
-#FIND_LIBRARY(VLFEAT_LIBRARY 
-#NAMES libvl.so
-#PATHS /home/ubuntu/workspace/vlfeat-0.9.20/bin/glnxa64
-#)
+#find_package(Boost 1.55.0 COMPONENTS thread)
+#include_directories(${Boost_INCLUDE_DIRS})
+#LINK_DIRECTORIES(${Boost_LIBRARY_DIRS}) 
+
 ENDIF()
 
-
-## file to build
-
-  
 # code
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/component)
-aux_source_directory(./src SRC)  
-aux_source_directory(./src/component SRC_COMPONENT)                       # cpp
+aux_source_directory(./src SRC)
+aux_source_directory(./src/component SRC_COMPONENT)
 
 # output binary
-add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT})
+#add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT})
 # output so
-#add_library( ${PROJECT_NAME} SHARED ${SRC} ${SRC_COMPONENT})
+add_library( ${PROJECT_NAME} SHARED ${SRC} ${SRC_COMPONENT})
+#add_library( ${PROJECT_NAME} STATIC ${SRC} ${SRC_COMPONENT})
 # link library
 
 IF (WIN32)
-  target_link_libraries(${PROJECT_NAME} opencv_world349.lib boost_system-vc141-mt-x64-1_66.lib libboost_filesystem-vc141-mt-x64-1_66.lib libboost_regex-vc141-mt-x64-1_66.lib) 
+  target_link_libraries(${PROJECT_NAME} opencv_world349.lib) 
+  # boost_system-vc141-mt-x64-1_66.lib libboost_filesystem-vc141-mt-x64-1_66.lib libboost_regex-vc141-mt-x64-1_66.lib
 ELSE()
-  target_link_libraries(${PROJECT_NAME} -lstdc++fs -lboost_system -lboost_filesystem -lboost_regex  ${OpenCV_LIBS} ${Boost_LIBRARIES}) #libSpinnaker.so ${Boost_LIBRARIES} ${VLFEAT_LIBRARY} -lgomp
+  target_link_libraries(${PROJECT_NAME} -lstdc++fs ${OpenCV_LIBS})
+  # -lgomp -lboost_system -lboost_filesystem -lboost_regex ${Boost_LIBRARIES}
 ENDIF()
+

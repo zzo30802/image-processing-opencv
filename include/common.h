@@ -20,8 +20,8 @@
 #include "opencv2/xfeatures2d.hpp"
 
 // boost
-#include "boost/filesystem.hpp"
-#include "boost/regex.hpp"
+// #include "boost/filesystem.hpp"
+// #include "boost/regex.hpp"
 
 // because c++ 11 don't have make_unique, so we make one by myself.
 template <typename T, typename... Args>
@@ -29,31 +29,31 @@ static std::unique_ptr<T> make_unique(Args &&...args) {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-inline int LoadFolderPath(const std::string &folder_path, std::vector<std::string> &img_path_vector, std::vector<std::string> &img_filename_vector) {
-  std::cout << "LoadFolderPath() start" << std::endl;
-  if (!folder_path.empty()) {
-    if (!boost::filesystem::exists(folder_path)) {
-      std::cout << "Folder : " << folder_path << " does not exist." << std::endl;
-      return -1;
-    }
-    // boost::regex pattern(folder_path + "/[0-9]*.png");
-    boost::filesystem::directory_iterator end_itr;
-    for (boost::filesystem::directory_iterator itr(folder_path); itr != end_itr; ++itr) {
-      if (boost::filesystem::is_directory(itr->status())) {
-      } else if ((itr->path().extension() == ".png") || (itr->path().extension() == ".bmp")) {
-        std::string imgpath = itr->path().string();
-        // std::cout << "imgpath : " << imgpath << std::endl;
-        img_path_vector.push_back(itr->path().string());
-        img_filename_vector.push_back(itr->path().filename().stem().string());
-      }
-      // else if (boost::regex_match(itr->path().string(), pattern)){
-      //   img_path_vector.push_back(itr->path().string());
-      // }
-    }
-  }
-  std::cout << "LoadFolderPath() end" << std::endl;
-  return 0;
-}
+// inline int LoadFolderPath(const std::string &folder_path, std::vector<std::string> &img_path_vector, std::vector<std::string> &img_filename_vector) {
+//   std::cout << "LoadFolderPath() start" << std::endl;
+//   if (!folder_path.empty()) {
+//     if (!boost::filesystem::exists(folder_path)) {
+//       std::cout << "Folder : " << folder_path << " does not exist." << std::endl;
+//       return -1;
+//     }
+//     // boost::regex pattern(folder_path + "/[0-9]*.png");
+//     boost::filesystem::directory_iterator end_itr;
+//     for (boost::filesystem::directory_iterator itr(folder_path); itr != end_itr; ++itr) {
+//       if (boost::filesystem::is_directory(itr->status())) {
+//       } else if ((itr->path().extension() == ".png") || (itr->path().extension() == ".bmp")) {
+//         std::string imgpath = itr->path().string();
+//         // std::cout << "imgpath : " << imgpath << std::endl;
+//         img_path_vector.push_back(itr->path().string());
+//         img_filename_vector.push_back(itr->path().filename().stem().string());
+//       }
+//       // else if (boost::regex_match(itr->path().string(), pattern)){
+//       //   img_path_vector.push_back(itr->path().string());
+//       // }
+//     }
+//   }
+//   std::cout << "LoadFolderPath() end" << std::endl;
+//   return 0;
+// }
 
 inline int ConvertMatToGrayscale(const cv::Mat &src, cv::Mat &gray_dst) {
   const int &&channel = src.channels();
