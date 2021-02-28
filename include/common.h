@@ -23,6 +23,11 @@
 // #include "boost/filesystem.hpp"
 // #include "boost/regex.hpp"
 
+// breakpad
+#ifdef _WIN32
+#include "client/windows/handler/exception_handler.h"
+#endif
+
 // because c++ 11 don't have make_unique, so we make one by myself.
 template <typename T, typename... Args>
 static std::unique_ptr<T> make_unique(Args &&...args) {
@@ -75,4 +80,5 @@ inline int ConvertMatToGrayscale(const cv::Mat &src, cv::Mat &gray_dst) {
   }
   return 0;
 }
+
 #endif  //_COMMON_H_

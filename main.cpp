@@ -1,6 +1,22 @@
 #include <iostream>
 
 #include "component/image_proc.h"
+// #ifdef _WIN32
+// #include "client/windows/handler/exception_handler.h"
+// #endif
+
+// #ifdef _WIN32
+// bool callback(const wchar_t *dump_path, const wchar_t *id,
+//               void *context, EXCEPTION_POINTERS *exinfo,
+//               MDRawAssertionInfo *assertion, bool succeeded) {
+//   if (succeeded)
+//     std::cout << "Create dump file success" << std::endl;
+//   else
+//     std::cout << "Create dump file failed" << std::endl;
+//   return succeeded;
+// }
+// #endif
+
 // ---load image---
 cv::Mat &&src = cv::imread("../images/Okonomiyaki.png");
 /*
@@ -18,6 +34,8 @@ index:
 9 : positioning by template matching
 ------Flate-Field-Correction------
 10 : FlatFieldCorrection
+------DumpFile------
+11 : build dump file (windows)
 */
 #define index 10
 
@@ -175,6 +193,22 @@ int main() {
   }
   cv::imshow("dst", dst);
   cv::waitKey(0);
+  return 0;
+}
+#elif index == 11
+
+int main() {
+#ifdef _WIN32
+  // https:  //blog.csdn.net/GoForwardToStep/article/details/58295246
+  const wchar_t *dumpPath = L"../dump_file/log";
+  google_breakpad::ExceptionHandler eh(
+      dumpPath, NULL, callback, NULL,
+      google_breakpad::ExceptionHandler::HANDLER_ALL);
+#endif
+  std::cout << "main start" << std::endl;
+  int *a = NULL;
+  *a = 0x1;
+  std::cout << "main end" << std::endl;
   return 0;
 }
 #endif

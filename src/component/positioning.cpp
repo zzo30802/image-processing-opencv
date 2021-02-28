@@ -1,6 +1,6 @@
-#include "positioning.h"
+#include "component/positioning.h"
 
-#include "image_proc.h"
+#include "component/image_proc.h"
 
 using namespace ipo;
 

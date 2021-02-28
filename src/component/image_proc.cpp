@@ -7,7 +7,7 @@ namespace ipo {
 int DynamicThreshold(const cv::Mat &src, cv::Mat &dst,
                      const int &blur_ksize, const int &offset,
                      const DynamicThresholdTypes &mode) {
-  CV_Assert(!src.empty());
+  // CV_Assert(!src.empty());
   if (dst.empty()) {
     dst = cv::Mat::zeros(src.size(), CV_8UC1);
   }

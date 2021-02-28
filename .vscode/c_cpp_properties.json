@@ -25,7 +25,7 @@
                 "${workspaceFolder}/include/component",
                 "D:\\thirdpartyforwindows\\opencv\\build\\include",
                 "D:\\thirdpartyforwindows\\Boost\\boost_1_66_0\\include",
-                "${workspaceFolder}/include/component"
+                "D:\\thirdpartyforwindows\\breakpad\\include"
             ],
             "defines": [
                 "_DEBUG",

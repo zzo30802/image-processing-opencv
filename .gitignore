@@ -47,3 +47,4 @@ build/computervision.dir
 build/computervision.sln
 build/computervision.vcxproj
 build/computervision.vcxproj.filters
+dump_file/log/*

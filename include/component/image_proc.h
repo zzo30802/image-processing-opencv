@@ -1,18 +1,19 @@
 #ifndef _IMAGE_PROC_H_
 #define _IMAGE_PROC_H_
 
-#include "attribute.h"
-#include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgcodecs.hpp"
-
 #ifdef computervision_EXPORTS
 #define IPO_API __declspec(dllexport)
 #else
 #define IPO_API __declspec(dllimport)
 #endif
 
+#include "attribute.h"
+#include "opencv2/core.hpp"
+#include "opencv2/highgui.hpp"
+// #include "opencv2/imgcodecs.hpp"
+
 namespace ipo {
+
 #ifdef _WIN32
 /**
  * @brief Calculate the diff value between subtraction of grayscale image and fuzzy image. If the value exceed the offset value, then it equal to 255, and vice versa.

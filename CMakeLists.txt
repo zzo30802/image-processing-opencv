@@ -12,8 +12,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)
 # Build PDB file
 # https://stackoverflow.com/questions/28178978/how-to-generate-pdb-files-for-release-build-with-cmake-flags
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
-set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
-#install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION bin OPTIONAL)
+#set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+
 
 #set(Boost_LIBRARY_DIRS /usr/local/lib)
 #message("Opencv Found --opencv_version  " ${OpenCV_VERSION})
@@ -51,6 +52,14 @@ message("OpenCV_LIBS : " ${OpenCV_LIBS})
 #link_directories (${BOOST_LIBS})
 #message("BOOST_INCLUDE_DIRS : " ${BOOST_INCLUDE_DIRS})
 #message("BOOST_LIBS : " ${BOOST_LIBS})
+## Breakpad
+set(BREAKPAD_ROOT $ENV{THIRD_PARTY}/breakpad)
+set(BREAKPAD_INCLUDE_DIR ${BREAKPAD_ROOT}/include)
+set(BREAKPAD_LIBS ${BREAKPAD_ROOT}/lib)
+include_directories(${BREAKPAD_INCLUDE_DIR})
+link_directories(${BREAKPAD_LIBS})
+message("BREAKPAD_INCLUDE_DIR : " ${BREAKPAD_INCLUDE_DIR})
+message("BREAKPAD_LIBS : " ${BREAKPAD_LIBS})
 #---------Linux---------
 ELSE()
 ## OpenCV
@@ -66,19 +75,20 @@ ENDIF()
 
 # code
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/include/component)
 aux_source_directory(./src SRC)
 aux_source_directory(./src/component SRC_COMPONENT)
+aux_source_directory(./src/error_code SRC_ERRORCODE)
 
 # output binary
-#add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT})
+add_executable(${PROJECT_NAME} main.cpp ${SRC} ${SRC_COMPONENT} ${SRC_ERRORCODE})
 # output so
-add_library( ${PROJECT_NAME} SHARED ${SRC} ${SRC_COMPONENT})
-#add_library( ${PROJECT_NAME} STATIC ${SRC} ${SRC_COMPONENT})
+#add_library( ${PROJECT_NAME} SHARED ${SRC} ${SRC_COMPONENT} ${SRC_ERRORCODE})
+#add_library( ${PROJECT_NAME} STATIC ${SRC} ${SRC_COMPONENT} ${SRC_ERRORCODE})
 # link library
 
 IF (WIN32)
-  target_link_libraries(${PROJECT_NAME} opencv_world349.lib) 
+  target_link_libraries(${PROJECT_NAME} opencv_world349.lib libbreakpad.lib libbreakpad_client.lib)
+  # libbreakpad.lib libbreakpad_client.lib 
   # boost_system-vc141-mt-x64-1_66.lib libboost_filesystem-vc141-mt-x64-1_66.lib libboost_regex-vc141-mt-x64-1_66.lib
 ELSE()
   target_link_libraries(${PROJECT_NAME} -lstdc++fs ${OpenCV_LIBS})

@@ -1,6 +1,6 @@
-#include "correction.h"
-
-#include "image_proc.h"
+#include "component/correction.h"
+#define computervision_EXPORTS
+#include "component/image_proc.h"
 using namespace ipo;
 //===========PIMPL (FlatFieldCorrection)===========
 FlatFieldCorrection::FlatFieldCorrection() : p_pimplFlatFieldCorrection(new PimplFlatFieldCorrection) {}
