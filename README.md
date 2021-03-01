@@ -85,7 +85,7 @@ int ipo::DynamicThreshold(const cv::Mat &src,
     @param mode         (DynamicThresholdTypes) switch to the select mode.
     @return             0:ok; -1:error
 LIGHT || DARK || LIGHT_AND_DARK_INRANGE || LIGHT_OR_DARK_OUTRANGE
-![Execute](result/DynamicThreshold/conbine.jpg)
+![Execute](images/result/DynamicThreshold/conbine.jpg)
 
 **Stretching**
 ```
@@ -103,7 +103,7 @@ int ipo::Stretching(const cv::Mat &src,
     @param high_value   height threshold.
     @return             0:ok; -1:error
 histogram || CV_8UC1 (low_value=100, high_value=200) || CV_8UC3 (low_value=100, high_value=200)
-![Execute](result/Stretching/conbine.jpg)
+![Execute](images/result/Stretching/conbine.jpg)
 
 **Variance**
 [Variance link to wiki](https://en.wikipedia.org/wiki/Variance)
@@ -117,7 +117,7 @@ int ipo::Variance(const cv::Mat &src,
     @param kernel_size  filter kernel size
     @return             0:ok; -1:error
 kernel_size = 3 || kernel_size = 10
-![Execute](result/Variance/conbine.jpg)
+![Execute](images/result/Variance/conbine.jpg)
 
 **FindTheSpecifiedColorByRGB**
 ```
@@ -148,7 +148,7 @@ cv::Point ipo::TwoLineIntersection(const cv::Point &x1_start,
     @param x2_start     the start point by the second line(line 2)
     @param x2_end       the end point by the second line  (line 2)
     @return             the intersection of two lines
-![Execute](result/TwoLineIntersection/two_line_intersection_pt.jpg)
+![Execute](images/result/TwoLineIntersection/two_line_intersection_pt.jpg)
 
 **ImageRotateByCenterAndAdjustBoundary**
 ```
@@ -158,7 +158,7 @@ cv::Mat ipo::ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src,
     @param src          input image
     @param angle        rotate angle
     @return             rotated image
-![Execute](result/ImageRotateByCenterAndAdjustBoundary/rotated_img.jpg)
+![Execute](images/result/ImageRotateByCenterAndAdjustBoundary/rotated_img.jpg)
 
 **positioning by feature/ template matching**
 ```
@@ -241,10 +241,12 @@ class Positioning {
     }
     ```
 Golden image || sample image || result : feature matching || result : template matching
-![Execute](result/positioning/conbine.jpg)
+![Execute](images/result/positioning/conbine.jpg)
 
 **Flate-Field-Correction**
+It cancels the effects of image artifacts caused by variations in the pixel-to-pixel sensitivity of the detector and by distortions in the optical path.
 [Image Source:](https://rawpedia.rawtherapee.com/File:Flatfield_landscape.jpg#file)
+[link to wiki](https://en.wikipedia.org/wiki/Flat-field_correction)
 ```
 class FlatFieldCorrection {
  public:
@@ -285,10 +287,10 @@ class FlatFieldCorrection {
   }
   ```
   input image : original image || dark field image || bright field image
-![Execute](result/positioning/input.jpg)
+![Execute](images/result/FlatFieldCorrection/input.jpg)
 
   Output image : CV_8UC1 || CV_8UC3
-![Execute](result/positioning/output.jpg)
+![Execute](images/result/FlatFieldCorrection/output.jpg)
 
 **Use google breakpad to build dump File**
 [google breakpad github](https://github.com/google/breakpad)
