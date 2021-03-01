@@ -23,6 +23,7 @@ class FeatureMatching : public IPositioning {
 
  private:
   cv::Mat GetHomography(const cv::Mat &sample_img);
+  cv::Mat MakeBorder(cv::Mat &src);
 
  private:
   //----cv::Rect----
@@ -44,7 +45,6 @@ class TemplateMatching : public IPositioning {
   // template <typename T>
   int SetAttribute(const int &attribute_type, const double &value);
   cv::Mat GetResult(const cv::Mat &sample_img);
-  int GG(){};
 
  private:
   //----cv::Rect----

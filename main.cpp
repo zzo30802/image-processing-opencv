@@ -28,7 +28,7 @@ index:
 4 : FindTheSpecifiedColorByRGB()
 5 : TwoLineIntersection()
 6 : GetTwoPointAngle()
-7 : GetNewRotatedImageSize()
+7 : ImageRotateByCenterAndAdjustBoundary()
 ------positioning------
 8 : positioning by feature matching(SURF)
 9 : positioning by template matching
@@ -37,7 +37,7 @@ index:
 ------DumpFile------
 11 : build dump file (windows)
 */
-#define index 10
+#define index 8
 
 #if index == 1
 // DynamicThreshold
@@ -63,7 +63,7 @@ int main() {
 // Variance
 int main() {
   cv::Mat dst;
-  if (ipo::Variance(src, dst, 5) != 0)
+  if (ipo::Variance(src, dst, 10) != 0)
     return -1;
   cv::imshow("dst", dst);
   cv::waitKey(0);
@@ -112,10 +112,10 @@ int main() {
   cv::resize(src, src, cv::Size(), 0.6, 0.6);
 
   const double &&angle = 30;
-  int width, height;
-  ipo::GetNewRotatedImageSize(src, angle, width, height);
-  cv::Mat &&dst = cv::Mat::zeros(cv::Size(width, height), src.type());
-  dst = ipo::ImageRotateByCenter(src, angle);
+  // int width, height;
+  // ipo::GetNewRotatedImageSize(src, angle, width, height);
+  cv::Mat &&dst = cv::Mat::zeros(src.size(), src.type());
+  dst = ipo::ImageRotateByCenterAndAdjustBoundary(src, angle);
   cv::imshow("dst", dst);
   cv::waitKey(0);
   return 0;
@@ -173,6 +173,7 @@ int main() {
   cv::Mat &&dst = position_obj->GetResult(sample);
   if (dst.empty())
     return -1;
+  cv::imwrite("../images/result/positioning/positioning_template.jpg", dst);
   cv::imshow("dst", dst);
   cv::waitKey(0);
 }
