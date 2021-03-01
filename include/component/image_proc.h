@@ -38,10 +38,6 @@ IPO_API int DynamicThreshold(const cv::Mat &src, cv::Mat &dst,
 **/
 IPO_API int Stretching(const cv::Mat &src, cv::Mat &dst,
                        const int &low_value, const int &high_value);
-
-/**
- * 
-**/
 IPO_API int Variance(const cv::Mat &src, cv::Mat &dst, const int &kernel_size);
 IPO_API int FindTheSpecifiedColorByRGB(const cv::Mat &src, cv::Mat &dst,
                                        const int &r, const int &g, const int &b, const double &tolerance);

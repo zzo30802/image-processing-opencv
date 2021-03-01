@@ -255,7 +255,7 @@ int FindTheSpecifiedColorByRGB(const cv::Mat &src, cv::Mat &dst,
   // convert src to dst
   cv::Mat &&hsv_s = cv::Mat::zeros(src.size(), CV_8UC3);  // channel = 3
   cv::cvtColor(src, hsv_s, CV_BGR2HSV);
-  cv::Mat &&selected_color = cv::Mat::zeros(src.size(), CV_8UC1);  // channel = 1
+  cv::Mat &&selected_color = cv::Mat::zeros(src.size(), CV_8UC3);  // channel = 1
   // cv::Mat &&bitwise_and = cv::Mat::zeros(src.size(), CV_8UC1);  // overlap region
 
   // convert b,g,r to h,s,v

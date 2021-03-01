@@ -188,33 +188,25 @@ cv::Mat FeatureMatching::GetResult(const cv::Mat &sample_img) {
   const double &&search_angle = GetTwoPointAngle(detected_corners[0], detected_corners[1]);
   cv::Point2f &&rotated_center = cv::Point2f(this->searching_rect.x + detected_corners[0].x,
                                              this->searching_rect.y + detected_corners[0].y);
-  cv::Mat &&rot_mat = cv::getRotationMatrix2D(rotated_center, -search_angle, 1.0);
-
-  //----rotate----
-  // calculate the new image size
-  // int width, height;
-  // GetNewRotatedImageSize(sample_img, -search_angle, width, height);
-  // cv::Mat &&dst = cv::Mat::zeros(sample_img.size(), sample_img.type());
-  // cv::warpAffine(sample_img, dst, rot_mat, cv::Size(width, height), cv::INTER_LANCZOS4, cv::BORDER_CONSTANT);
-
-  // cv::Mat &&dst = cv::Mat::zeros(sample_img.size() * 2, sample_img.type());
-  // dst = sample_img.clone();
-  // dst = ImageRotate(dst, search_angle, rotated_center);
-
-  // cv::imshow("dstdst", dst);
   //----shift----
   const int offsetx = rotated_center.x - this->template_rect.x;
   const int offsety = rotated_center.y - this->template_rect.y;
-  // std::cout << "offsetx : " << offsetx << std::endl;
-  // std::cout << "offsety : " << offsety << std::endl;
-  // const cv::Mat &&shifte_mat = (cv::Mat_<double>(2, 3) << 1, 0, -offsetx, 0, 1, -offsety);
-  // cv::warpAffine(dst, dst, shifte_mat, sample_img.size());
 
   cv::Mat &&dst = cv::Mat::zeros(sample_img.size(), sample_img.type());
   dst = sample_img.clone();
-  dst = ImageRotate(dst, search_angle, rotated_center);
-  dst = ImageShift(dst, rotated_center, cv::Point(template_rect.x, template_rect.y));
-
+  // dst = ImageRotate(dst, search_angle, rotated_center);
+  // dst = ImageShift(dst, rotated_center, cv::Point(template_rect.x, template_rect.y));
+  // cv::Mat &&shifted_mat = (cv::Mat_<double>(3, 3) << 1, 0, -offsetx, 0, 1, -offsety, 0, 0, 1);
+  // cv::Mat &&rotated_mat = cv::getRotationMatrix2D(rotated_center, -search_angle, 1.0);
+  // cv::Mat &&row = (cv::Mat_<double>(1, 3) << 0, 0, 1);
+  // cv::Mat conbine_mat;
+  // cv::vconcat(rotated_mat, row, conbine_mat);
+  // conbine_mat *= shifted_mat;
+  // cv::warpPerspective(dst, dst, conbine_mat, sample_img.size(), cv::INTER_LANCZOS4);
+  cv::Mat &&transform_mat = cv::getRotationMatrix2D(rotated_center, -search_angle, 1.0);
+  transform_mat.at<double>(0, 2) += -offsetx;
+  transform_mat.at<double>(1, 2) += -offsety;
+  cv::warpAffine(dst, dst, transform_mat, sample_img.size(), cv::INTER_LANCZOS4);
   return dst.clone();
 }
 
@@ -417,8 +409,14 @@ cv::Mat TemplateMatching::GetResult(const cv::Mat &sample_img) {
   // result
   cv::Mat &&dst = cv::Mat::zeros(sample_img.size(), sample_img.type());
   dst = sample_img.clone();
-  dst = ImageRotate(dst, -angle, cv::Point(dst.cols / 2, dst.rows / 2));
-  dst = ImageShift(dst, maxLoc, cv::Point(template_rect.x, template_rect.y));
+  // dst = ImageRotate(dst, -angle, cv::Point(dst.cols / 2, dst.rows / 2));
+  // dst = ImageShift(dst, maxLoc, cv::Point(template_rect.x, template_rect.y));
+  const int offsetx = maxLoc.x - this->template_rect.x;
+  const int offsety = maxLoc.y - this->template_rect.y;
+  cv::Mat &&transform_mat = cv::getRotationMatrix2D(cv::Point(dst.cols / 2, dst.rows / 2), angle, 1.0);
+  transform_mat.at<double>(0, 2) += -offsetx;
+  transform_mat.at<double>(1, 2) += -offsety;
+  cv::warpAffine(dst, dst, transform_mat, sample_img.size(), cv::INTER_LANCZOS4);
   return dst.clone();
 }
 

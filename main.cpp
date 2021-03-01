@@ -37,7 +37,7 @@ index:
 ------DumpFile------
 11 : build dump file (windows)
 */
-#define index 8
+#define index 10
 
 #if index == 1
 // DynamicThreshold
@@ -144,6 +144,7 @@ int main() {
   cv::Mat &&dst = position_obj->GetResult(sample);
   if (dst.empty())
     return -1;
+  // cv::imwrite("../images/result/positioning/positioning_feature.jpg", dst);
   cv::imshow("dst", dst);
   cv::waitKey(0);
 }
@@ -164,16 +165,16 @@ int main() {
     return -1;
   if (position_obj->SetRect(ipo::PositioningRectEnums::TEMPLATE_IMG_RECT, template_rect) != 0)
     return -1;
-  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::ANGLE_TOLERANCE, 30) != 0)
+  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::ANGLE_TOLERANCE, 20) != 0)
     return -1;
-  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::NUMBER_OF_LEVELS, 2) != 0)
+  if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::NUMBER_OF_LEVELS, 1) != 0)
     return -1;
   if (position_obj->SetAttribute(ipo::TemplateAttributeEnums::THRESHOLD_SCORE, 0.8) != 0)
     return -1;
   cv::Mat &&dst = position_obj->GetResult(sample);
   if (dst.empty())
     return -1;
-  cv::imwrite("../images/result/positioning/positioning_template.jpg", dst);
+  // cv::imwrite("../images/result/positioning/positioning_template.jpg", dst);
   cv::imshow("dst", dst);
   cv::waitKey(0);
 }
@@ -181,9 +182,9 @@ int main() {
 int main() {
   // image from : https://rawpedia.rawtherapee.com/File:Flatfield_landscape.jpg#file
   //----Load images----
-  cv::Mat &&dark_field = cv::imread("../images/flat-field-correction/dark.jpg");
-  cv::Mat &&bright_field = cv::imread("../images/flat-field-correction/bright.jpg");
-  cv::Mat &&sample = cv::imread("../images/flat-field-correction/sample.jpg");
+  cv::Mat &&dark_field = cv::imread("../images/flat-field-correction/dark.jpg", 0);
+  cv::Mat &&bright_field = cv::imread("../images/flat-field-correction/bright.jpg", 0);
+  cv::Mat &&sample = cv::imread("../images/flat-field-correction/sample.jpg", 0);
 
   std::shared_ptr<ipo::FlatFieldCorrection> &&obj = std::make_shared<ipo::FlatFieldCorrection>();
   if (obj->SetDarkAndBrightFieldImage(dark_field, bright_field, 200) != 0)
@@ -192,6 +193,7 @@ int main() {
   if (dst.empty()) {
     return -1;
   }
+  cv::imwrite("../images/result/FlatFieldCorrection/CV_8UC1.jpg", dst);
   cv::imshow("dst", dst);
   cv::waitKey(0);
   return 0;
@@ -200,7 +202,6 @@ int main() {
 
 int main() {
 #ifdef _WIN32
-  // https:  //blog.csdn.net/GoForwardToStep/article/details/58295246
   const wchar_t *dumpPath = L"../dump_file/log";
   google_breakpad::ExceptionHandler eh(
       dumpPath, NULL, callback, NULL,

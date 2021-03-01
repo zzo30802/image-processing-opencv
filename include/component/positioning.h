@@ -23,7 +23,6 @@ class FeatureMatching : public IPositioning {
 
  private:
   cv::Mat GetHomography(const cv::Mat &sample_img);
-  cv::Mat MakeBorder(cv::Mat &src);
 
  private:
   //----cv::Rect----
