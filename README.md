@@ -73,7 +73,7 @@ enum TemplateAttributeEnums {
   THRESHOLD_SCORE = 2,   // 0~1.0
 };
 ```
-**DynamicThreshold**
+###**DynamicThreshold**
 ```
 int ipo::DynamicThreshold(const cv::Mat &src,
                           cv::Mat &dst,
@@ -90,7 +90,7 @@ int ipo::DynamicThreshold(const cv::Mat &src,
 LIGHT || DARK || LIGHT_AND_DARK_INRANGE || LIGHT_OR_DARK_OUTRANGE
 ![Execute](images/result/DynamicThreshold/conbine.jpg)
 
-**Stretching**
+###**Stretching**
 ```
 int ipo::Stretching(const cv::Mat &src,
                     cv::Mat &dst,
@@ -108,7 +108,7 @@ int ipo::Stretching(const cv::Mat &src,
 histogram || CV_8UC1 (low_value=100, high_value=200) || CV_8UC3 (low_value=100, high_value=200)
 ![Execute](images/result/Stretching/conbine.jpg)
 
-**Variance**
+###**Variance**
 [Variance link to wiki](https://en.wikipedia.org/wiki/Variance)
 ```
 int ipo::Variance(const cv::Mat &src,
@@ -122,7 +122,7 @@ int ipo::Variance(const cv::Mat &src,
 kernel_size = 3 || kernel_size = 10
 ![Execute](images/result/Variance/conbine.jpg)
 
-**FindTheSpecifiedColorByRGB**
+###**FindTheSpecifiedColorByRGB**
 ```
 int ipo::FindTheSpecifiedColorByRGB(const cv::Mat &src, cv::Mat &dst,
                                        const int &r,
@@ -137,9 +137,9 @@ int ipo::FindTheSpecifiedColorByRGB(const cv::Mat &src, cv::Mat &dst,
     @param b            the b channel of the RGB color space
     @param tolerance    the tolerance of  the rgb color
     @return             0:ok; -1:error
-![Execute](result/FindTheSpecifiedColorByRGB/filter_color.jpg)
+![Execute](images/result/FindTheSpecifiedColorByRGB/filter_color.jpg)
 
-**TwoLineIntersection**
+###**TwoLineIntersection**
 ```
 cv::Point ipo::TwoLineIntersection(const cv::Point &x1_start,
                               const cv::Point &x1_end,
@@ -153,7 +153,7 @@ cv::Point ipo::TwoLineIntersection(const cv::Point &x1_start,
     @return             the intersection of two lines
 ![Execute](images/result/TwoLineIntersection/two_line_intersection_pt.jpg)
 
-**ImageRotateByCenterAndAdjustBoundary**
+###**ImageRotateByCenterAndAdjustBoundary**
 ```
 cv::Mat ipo::ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src,
                                                   const double &angle);
@@ -163,7 +163,7 @@ cv::Mat ipo::ImageRotateByCenterAndAdjustBoundary(const cv::Mat &src,
     @return             rotated image
 ![Execute](images/result/ImageRotateByCenterAndAdjustBoundary/rotated_img.jpg)
 
-**positioning by feature/ template matching**
+###**positioning by feature/ template matching**
 ```
 class Positioning {
  public:
@@ -246,7 +246,7 @@ class Positioning {
 Golden image || sample image || result : feature matching || result : template matching
 ![Execute](images/result/positioning/conbine.jpg)
 
-**Flate-Field-Correction**
+###**Flate-Field-Correction**
 It cancels the effects of image artifacts caused by variations in the pixel-to-pixel sensitivity of the detector and by distortions in the optical path.
 [Image Source:](https://rawpedia.rawtherapee.com/File:Flatfield_landscape.jpg#file)
 [link to wiki](https://en.wikipedia.org/wiki/Flat-field_correction)
@@ -295,7 +295,7 @@ class FlatFieldCorrection {
   Output image : CV_8UC1 || CV_8UC3
 ![Execute](images/result/FlatFieldCorrection/output.jpg)
 
-**Use google breakpad to build dump File**
+###**Use google breakpad to build dump File**
 [google breakpad github](https://github.com/google/breakpad)
 - Description :
   It can catch the core dump if it occurs in the program, you can know where it happened.
