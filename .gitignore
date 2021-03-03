@@ -43,8 +43,8 @@ build/ALL_BUILD.vcxproj.filters
 build/ZERO_CHECK.vcxproj
 build/ZERO_CHECK.vcxproj.filters
 build/x64
-build/computervision.dir
-build/computervision.sln
-build/computervision.vcxproj
-build/computervision.vcxproj.filters
+build/ipo_cv.dir
+build/ipo_cv.sln
+build/ipo_cv.vcxproj
+build/ipo_cv.vcxproj.filters
 dump_file/log/*
